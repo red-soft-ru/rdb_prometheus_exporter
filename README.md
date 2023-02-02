@@ -107,6 +107,7 @@ This is a prometheus exporter for DBMS "Red Database".
       <ul>
         <li><b>OK</b>: amount of successful statements</li>
         <li><b>FAIL</b>: amount of failed statements</li>
+        <li><b>EXEC_TIME</b>: time of statements execution</li>
       </ul>
     </td>
   </tr>

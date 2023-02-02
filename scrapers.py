@@ -225,11 +225,13 @@ def scrape_trace(path_to_trace, db_name) -> str:
         data = file.read()
     fails = 0
     OK = 0
+    exec_time = 0
     fails_execute_strings = re.findall(r'^\d{4}-\d{2}-\d{2}T.*\) FAILED EXECUTE_STATEMENT_FINISH', data, re.M)
     fails_prepare_strings = re.findall(r'^\d{4}-\d{2}-\d{2}T.*\) FAILED PREPARE_STATEMENT', data, re.M)
     fails_unauth_execute_strings = re.findall(r'^\d{4}-\d{2}-\d{2}T.*\) UNAUTHORIZED EXECUTE_STATEMENT_FINISH', data, re.M)
     fails_unauth_prepare_strings = re.findall(r'^\d{4}-\d{2}-\d{2}T.*\) UNAUTHORIZED PREPARE_STATEMENT', data, re.M)
     finish_strings = re.findall(r'^\d{4}-\d{2}-\d{2}T.*\) EXECUTE_STATEMENT_FINISH', data, re.M)
+    time_strings = re.findall(r'^ *(\d+) ms', data, re.M)
     if not fails_execute_strings is None:
         fails += len(fails_execute_strings)
     if not fails_prepare_strings is None:
@@ -240,7 +242,11 @@ def scrape_trace(path_to_trace, db_name) -> str:
         fails += len(fails_unauth_prepare_strings)
     if not finish_strings is None:
         OK += len(finish_strings)
+    if not time_strings is None:
+        for t in time_strings:
+            exec_time += int(t)
     response = ""
     response += "trace_statements{database=\"%s\", type=\"OK\"} %i\n" % (db_name, OK)
     response += "trace_statements{database=\"%s\", type=\"FAIL\"} %i\n" % (db_name, fails)
+    response += "trace_statements{database=\"%s\", type=\"EXEC_TIME\"} %i\n" % (db_name, exec_time / 1000)
     return response
